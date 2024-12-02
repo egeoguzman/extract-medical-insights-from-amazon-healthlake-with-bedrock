@@ -23,7 +23,7 @@ config = Config(
         max_attempts = 10
     )
 )
-BEDROCK=boto3.client(service_name='bedrock-runtime',region_name='us-west-2',config=config)
+BEDROCK=boto3.client(service_name='bedrock-runtime',region_name='us-east-1',config=config)
 st.set_page_config(page_icon=None, layout="wide")
 with open('pricing.json','r',encoding='utf-8') as f:
     pricing_file = json.load(f)
@@ -236,6 +236,7 @@ def athena_query_func(statement, params):
     response = ATHENA.start_query_execution(
         QueryString=statement,
         # ClientRequestToken='string',
+        WorkGroup='healthlake-workgroup',
         QueryExecutionContext={
             'Database': params["db"],
             'Catalog': 'AwsDataCatalog'
@@ -656,12 +657,12 @@ def app_sidebar():
         st.write('---')
         st.write('### User Preference')
         models=[
-  "us.anthropic.claude-3-5-sonnet-20240620-v1:0",
-"us.anthropic.claude-3-5-haiku-20241022-v1:0",
- "us.anthropic.claude-3-sonnet-20240229-v1:0",
-  "us.anthropic.claude-3-haiku-20240307-v1:0",
-  'anthropic.claude-instant-v1', 
-  'anthropic.claude-v2']
+            'anthropic.claude-3-5-sonnet-20240620-v1:0',
+            'anthropic.claude-3-5-haiku-20241022-v1:0',
+            'anthropic.claude-3-sonnet-20240229-v1:0',
+            'anthropic.claude-3-haiku-20240307-v1:0',
+            'anthropic.claude-instant-v1', 
+            'anthropic.claude-v2:1']
         model=st.selectbox('Model', models, index=0)
         summary_model=st.selectbox('Summary Model', models, index=1)
         db=get_database_list('AwsDataCatalog')
@@ -686,6 +687,7 @@ def app_sidebar():
 def main():
     params=app_sidebar()   
     struct_summary(params)
+    #st.write(params)
     st.session_state['button']=False
 
 if __name__ == '__main__':
